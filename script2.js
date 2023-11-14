@@ -62,3 +62,58 @@ const gameEvents = (() => {
         cell.classList.add(currentClass)
     }
 })();
+
+
+
+// some example of module pattern
+
+// private function to store global variables and cache DOM elements
+(function() {
+    let players = {
+        player1: ['X', token = 1],
+        player2: ['O', token = 2],
+        init: function() {
+            this.cacheDOM();
+        },
+        cacheDOM: function() {
+            this.$el = $('#playersModule');
+            this.$button = this.$el.find('button');
+            this.$input = this.$el.find('input');
+            this.$ul = this.$el.find('ul');
+            this.template = this.$el.find('#player-template').html();
+        },
+
+        // a method to add and delete players to the game
+        bindEvents: function() {
+            // this method will make so addPlayer will always run in the context of the players object
+            this.$button.on('click', this.addPlayer.bind(this)); // bind the this keyword to the addPlayer function
+            
+            this.$ul.delegate('i.del', 'click', this.deletePlayer.bind(this));
+        },
+
+        // this method will take the current state of whole function
+        // and render it to the html DOM file
+        render: function() {
+            let data = {
+                players: this.player1,
+                players: this.player2
+            };
+            this.$ul.html(Mustache.render(this.template, data));
+        },
+        addPlayer: function() {
+            // adding players to the array
+            this.player1.push(this.$input.val());
+            this.render();
+            this.$input.val('');
+        },
+        deletePlayer: function(event) {
+            let $remove = $(event.target).closest('li');
+            let i = this.$ul.find('li').index($remove);
+
+            this.player1.splice(i, 1);
+            this.render();
+        }
+    };
+    players.init();
+
+})(); // the function is called immediately with the () at the end
